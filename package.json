@@ -1,6 +1,6 @@
 {
   "name": "pet-timer-app",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Productivity timer with a floating pet companion",
   "private": true,
   "main": "dist-electron/main.js",

@@ -9,6 +9,14 @@ import log from 'electron-log';
 
 // All command-line switches MUST be appended before app is ready.
 
+// Pin the app name so dev mode and the packaged build share the same
+// userData root. Without this, dev uses package.json's `name`
+// (pet-timer-app) while the installer uses electron-builder's
+// `productName` ('Pet Timer'), giving us two separate electron-store
+// files. Must be called BEFORE the Store constructor below and before
+// anything else reads app.getPath('userData').
+app.setName('Pet Timer');
+
 // Windows: Chromium's occlusion detection wrongly marks transparent areas as
 // occluded and stops compositing them, producing a grey checkerboard.
 app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
