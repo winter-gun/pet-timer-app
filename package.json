@@ -1,6 +1,6 @@
 {
   "name": "pet-timer-app",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Productivity timer with a floating pet companion",
   "private": true,
   "main": "dist-electron/main.js",
@@ -41,10 +41,27 @@
   "build": {
     "appId": "com.pettimer.app",
     "productName": "Pet Timer",
+    "asar": true,
+    "compression": "maximum",
+    "removePackageScripts": true,
+    "electronLanguages": ["en-US", "ko"],
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
-      "assets/**/*"
+      "assets/pets/fennec/idle.png",
+      "package.json",
+      "!**/node_modules/firebase/**",
+      "!**/node_modules/@firebase/**",
+      "!**/node_modules/react/**",
+      "!**/node_modules/react-dom/**",
+      "!**/node_modules/react-router-dom/**",
+      "!**/node_modules/zustand/**",
+      "!**/node_modules/clsx/**",
+      "!**/node_modules/scheduler/**",
+      "!**/*.map",
+      "!**/{test,tests,__tests__,powered-test,example,examples}/**",
+      "!**/*.md",
+      "!**/docs/**"
     ],
     "directories": {
       "buildResources": "build",
