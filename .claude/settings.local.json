@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Process *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(timeout 12)",
+      "Bash(Start-Process -NoNewWindow -PassThru npm -ArgumentList \"run\",\"dev\")",
+      "Bash(Start-Sleep 15)",
+      "Bash(Write-Host \"=== Electron process check ===\")",
+      "Bash(Get-Process -Name \"electron\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Id,CPU,WorkingSet)",
+      "PowerShell(Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bmp = New-Object System.Drawing.Bitmap\\($screen.Width, $screen.Height\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.CopyFromScreen\\($screen.Location, [System.Drawing.Point]::Empty, $screen.Size\\); $bmp.Save\\(\"C:\\\\Users\\\\KANGGU~1\\\\AppData\\\\Local\\\\Temp\\\\pet-timer-screenshot.png\"\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\); Write-Host \"Screenshot saved\")",
+      "PowerShell(Start-Sleep 3; Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $w = 500; $h = 60; $x = $screen.Width - $w; $y = $screen.Height - $h; $bmp = New-Object System.Drawing.Bitmap\\($w, $h\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.CopyFromScreen\\($x, $y, 0, 0, [System.Drawing.Size]::new\\($w, $h\\)\\); $bmp.Save\\(\"C:\\\\Users\\\\KANGGU~1\\\\AppData\\\\Local\\\\Temp\\\\tray-check.png\"\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\); Write-Host \"Done\")",
+      "PowerShell(Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; Write-Host \"Screen: $\\($screen.Width\\) x $\\($screen.Height\\)\"; $bmp = New-Object System.Drawing.Bitmap\\($screen.Width, $screen.Height\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.CopyFromScreen\\(0, 0, 0, 0, $screen.Size\\); $bmp.Save\\(\"C:\\\\Users\\\\KANGGU~1\\\\AppData\\\\Local\\\\Temp\\\\fullscreen2.png\"\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\); Write-Host \"Saved\")",
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /FI \"IMAGENAME eq electron.exe\")",
+      "PowerShell(Get-ChildItem release -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer } | Select-Object Name, @{N='SizeMB';E={[math]::Round\\($_.Length / 1MB, 1\\)}}, LastWriteTime | Format-Table -AutoSize)"
+    ]
+  }
+}

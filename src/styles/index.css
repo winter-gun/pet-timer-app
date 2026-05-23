@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+}
+
+.pet-drag {
+  -webkit-app-region: drag;
+  /* Windows transparent windows: DWM doesn't deliver WM_NCHITTEST to fully
+     transparent pixels, so app-region: drag can't fire there. ~5% alpha
+     is still effectively invisible against any wallpaper but well above
+     the DWM hit-test threshold. */
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.pet-no-drag {
+  -webkit-app-region: no-drag;
+}
