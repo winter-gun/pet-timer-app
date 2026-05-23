@@ -1,14 +1,18 @@
 import { usePetStore } from '@shared/store/petStore';
 import { useTimerStore } from '@shared/store/timerStore';
+import { useLevelStore } from '@shared/store/levelStore';
 import PetDisplay from './PetDisplay';
 import SpeechBubble from './SpeechBubble';
+import FriendsStrip from './FriendsStrip';
 
 function formatToday(sec: number): string {
   const totalMinutes = Math.floor(Math.max(0, sec) / 60);
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
-  if (h > 0) return `오늘 ${h}시간 ${m}분`;
-  return `오늘 ${m}분`;
+  if (h > 0) {
+    return m > 0 ? `${h}시간 ${m}분` : `${h}시간`;
+  }
+  return `${m}분`;
 }
 
 const TEXT_SHADOW = '0 1px 4px rgba(0,0,0,0.6)';
@@ -17,6 +21,7 @@ export default function PetWindow() {
   const name = usePetStore((s) => s.name);
   const species = usePetStore((s) => s.species);
   const todayTotal = useTimerStore((s) => s.todayTotal);
+  const level = useLevelStore((s) => s.level);
 
   const handleClick = () => {
     window.electronAPI?.showMain();
@@ -36,6 +41,13 @@ export default function PetWindow() {
       className="relative w-full h-full flex flex-col items-center justify-end p-3 select-none pet-drag"
       onContextMenu={handleContextMenu}
     >
+      <div
+        className="pet-no-drag absolute top-2 left-2 px-2 py-0.5 rounded-full bg-amber-400/95 text-white text-[11px] font-bold shadow"
+        style={{ textShadow: '0 1px 1px rgba(0,0,0,0.25)' }}
+      >
+        Lv.{level}
+      </div>
+
       <SpeechBubble />
       <button
         type="button"
@@ -48,17 +60,13 @@ export default function PetWindow() {
       </button>
 
       <div
-        className="pet-drag w-full h-16 flex items-center justify-center text-white text-base font-medium tracking-wide"
+        className="pet-drag w-full h-12 flex items-center justify-center text-white text-base font-medium tracking-wide"
         style={{ textShadow: TEXT_SHADOW }}
       >
         {formatToday(todayTotal)}
       </div>
 
-      {name && (
-        <div className="pet-drag text-xs px-2 py-0.5 bg-white/85 rounded-full shadow">
-          {name}
-        </div>
-      )}
+      <FriendsStrip />
     </div>
   );
 }

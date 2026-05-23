@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePetStore } from '@shared/store/petStore';
 import { useTimerStore } from '@shared/store/timerStore';
+import { useLevelStore } from '@shared/store/levelStore';
+import { useInventoryStore } from '@shared/store/inventoryStore';
+import { ITEM_BY_ID } from '@shared/items';
 import { getPetImage } from '@shared/petAssets';
 import type { PetPose, TimerStatus } from '@shared/types';
 
@@ -57,6 +60,10 @@ export default function PetDisplay({ className = '' }: Props) {
   const species = usePetStore((s) => s.species);
   const timerStatus = useTimerStore((s) => s.status);
   const timerMode = useTimerStore((s) => s.mode);
+  const equippedHatId = useInventoryStore((s) => s.equippedHat);
+  const equippedAccessoryId = useInventoryStore((s) => s.equippedAccessory);
+  const hat = equippedHatId ? ITEM_BY_ID[equippedHatId] : null;
+  const accessory = equippedAccessoryId ? ITEM_BY_ID[equippedAccessoryId] : null;
 
   const reducedMotion = useReducedMotion();
 
@@ -120,6 +127,15 @@ export default function PetDisplay({ className = '' }: Props) {
     }
     setMood('idle');
   }, [timerStatus, timerMode]);
+
+  // Level-up takes priority over the timer-derived mood — drop into celebrate
+  // as soon as a new level is announced. The mood effect below will arm the
+  // 10s return-to-idle timer just like a natural completion.
+  const justLeveledUpTo = useLevelStore((s) => s.justLeveledUpTo);
+  useEffect(() => {
+    if (justLeveledUpTo == null) return;
+    setMood('celebrate');
+  }, [justLeveledUpTo]);
 
   // Per-mood scheduling. Effect cleanup tears down every timer the
   // previous mood scheduled before the new mood arms its own.
@@ -220,7 +236,10 @@ export default function PetDisplay({ className = '' }: Props) {
       `}</style>
       <div
         className={`relative w-full h-full ${animationClass} ${className}`}
-        style={{ willChange: 'transform, opacity' }}
+        // `containerType: inline-size` makes the cqw units on the equipped-item
+        // emojis below scale relative to *this* wrapper's width, so they
+        // grow/shrink with the pet window's size preset.
+        style={{ willChange: 'transform, opacity', containerType: 'inline-size' }}
       >
         <img
           src={baseSrc}
@@ -239,6 +258,37 @@ export default function PetDisplay({ className = '' }: Props) {
               transition: `opacity ${overlayFadeMs}ms ease-in-out`,
             }}
           />
+        )}
+        {hat && (
+          <div
+            aria-hidden
+            className="absolute pointer-events-none select-none"
+            style={{
+              top: '-2%',
+              left: '50%',
+              transform: 'translateX(-50%) rotate(-8deg)',
+              fontSize: '34cqw',
+              lineHeight: 1,
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
+            }}
+          >
+            {hat.emoji}
+          </div>
+        )}
+        {accessory && (
+          <div
+            aria-hidden
+            className="absolute pointer-events-none select-none"
+            style={{
+              top: '15%',
+              right: '4%',
+              fontSize: '20cqw',
+              lineHeight: 1,
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
+            }}
+          >
+            {accessory.emoji}
+          </div>
         )}
       </div>
     </>

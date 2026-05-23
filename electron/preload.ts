@@ -11,11 +11,25 @@ const api = {
   quit: () => ipcRenderer.invoke('app:quit'),
   showContextMenu: () => ipcRenderer.invoke('tray:showContextMenu'),
 
+  getAutoLaunch: () => ipcRenderer.invoke('app:getAutoLaunch') as Promise<boolean>,
+  setAutoLaunch: (enabled: boolean) =>
+    ipcRenderer.invoke('app:setAutoLaunch', enabled) as Promise<void>,
+
   // Tray "시작/일시정지" → main → main-window renderer
   onTimerToggle: (cb: () => void) => {
     ipcRenderer.on('timer:toggle', cb);
     return () => { ipcRenderer.removeListener('timer:toggle', cb); };
   },
+
+  // Google OAuth loopback flow (RFC 8252). Renderer hands in clientId/secret;
+  // main spins up a one-shot HTTP listener, opens the consent page in the
+  // system browser, and resolves with id_token / access_token.
+  googleAuthStart: (req: { clientId: string; clientSecret: string }) =>
+    ipcRenderer.invoke('auth:googleStart', req) as Promise<{
+      idToken: string;
+      accessToken: string;
+      refreshToken?: string;
+    }>,
 
   // Renderer → main: a store changed (fire-and-forget, no response needed)
   syncState: (channel: string, payload: unknown) =>
