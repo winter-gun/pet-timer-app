@@ -1,9 +1,11 @@
-import { app, BrowserWindow, ipcMain, Menu, nativeImage, screen, shell, Tray } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, screen, shell, Tray } from 'electron';
 import http from 'node:http';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
 import Store from 'electron-store';
+import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
 
 // All command-line switches MUST be appended before app is ready.
 
@@ -602,6 +604,55 @@ ipcMain.on('store:sync', (_, channel: string, payload: unknown) => {
 });
 
 // ---------------------------------------------------------------------------
+// Auto-updates — pulls releases from the GitHub feed configured in
+// package.json's `build.publish`. `latest.yml` is uploaded next to the
+// installer at release time; electron-updater fetches that, compares
+// versions, and (by default) downloads in the background.
+//
+// We hold the install prompt until the user clicks "지금 재시작" — for a
+// tray-resident app the user might not quit for days, so silently waiting
+// for next app quit isn't a useful UX.
+// ---------------------------------------------------------------------------
+
+log.transports.file.level = 'info';
+autoUpdater.logger = log;
+
+function setupAutoUpdater() {
+  // No app-update.yml ships in dev mode, so calling checkForUpdates would
+  // throw "Could not locate update info" every launch.
+  if (!app.isPackaged) return;
+
+  autoUpdater.on('update-downloaded', async (info) => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: '업데이트 준비됨',
+      message: `Pet Timer ${info.version} 가 다운로드되었습니다.`,
+      detail: '지금 재시작해서 적용하시겠어요? 나중에 종료하실 때도 자동으로 적용됩니다.',
+      buttons: ['지금 재시작', '나중에'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (response === 0) {
+      quitting = true;
+      autoUpdater.quitAndInstall();
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    log.warn('[updater] error', err);
+  });
+
+  // Give the renderer a few seconds to settle before contending for
+  // bandwidth on the user's network.
+  setTimeout(() => {
+    autoUpdater
+      .checkForUpdates()
+      .catch((err) => log.warn('[updater] check failed', err));
+  }, 5_000);
+}
+
+// ---------------------------------------------------------------------------
 // App lifecycle
 // ---------------------------------------------------------------------------
 
@@ -614,6 +665,7 @@ app.whenReady().then(() => {
   createMainWindow();
   createPetWindow();
   createTray();
+  setupAutoUpdater();
 });
 
 app.on('window-all-closed', () => {

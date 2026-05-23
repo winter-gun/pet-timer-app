@@ -12,7 +12,10 @@ export default defineConfig({
                     build: {
                         outDir: 'dist-electron',
                         rollupOptions: {
-                            external: ['electron-store'],
+                            // electron-updater and electron-log have native code paths and
+                            // dynamic requires that vite shouldn't try to bundle — keep
+                            // them as runtime CJS requires resolved from node_modules.
+                            external: ['electron-store', 'electron-updater', 'electron-log'],
                         },
                     },
                 },
