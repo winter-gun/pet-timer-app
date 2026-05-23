@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const items = [
   { to: '/', label: '홈', end: true },
   { to: '/timer', label: '타이머' },
+  { to: '/room', label: '공부방' },
   { to: '/goals', label: '목표' },
   { to: '/stats', label: '통계' },
   { to: '/settings', label: '설정' },

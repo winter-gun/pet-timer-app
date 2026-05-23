@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import type { TimerMode, TimerStatus } from '../types';
 import { saveSession, type SessionPayload } from '../firestore';
+import { playCompletionSound } from '../sound';
 import { useAuthStore } from './authStore';
+import { usePrefsStore } from './prefsStore';
+import { pushRoomStatus } from './roomStore';
 
 export type TimerPreset = 'pomodoro' | 'short' | 'long' | 'custom';
 
@@ -148,16 +151,19 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     };
     set({ status: 'running', durationSec: d, remainingSec: d });
     sync({ status: 'running', mode, durationSec: d, remainingSec: d });
+    pushRoomStatus({ status: 'running', mode });
   },
 
   pause: () => {
     set({ status: 'paused' });
     sync({ status: 'paused' });
+    pushRoomStatus({ status: 'paused' });
   },
 
   resume: () => {
     set({ status: 'running' });
     sync({ status: 'running' });
+    pushRoomStatus({ status: 'running' });
   },
 
   stop: () => {
@@ -173,6 +179,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     const d = state.durationSec;
     set({ status: 'idle', remainingSec: d });
     sync({ status: 'idle', remainingSec: d });
+    pushRoomStatus({ status: 'idle' });
   },
 
   tick: () => {
@@ -200,6 +207,10 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       if (currentSession) {
         persistSession(currentSession.plannedDurationSec, true);
       }
+      if (usePrefsStore.getState().soundEnabled) {
+        playCompletionSound();
+      }
+      pushRoomStatus({ status: 'idle', todayMin: Math.floor(todayTotal / 60) });
     }
 
     set({
@@ -223,6 +234,9 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       }
       sync(payload);
       persistTodayTotal(todayTotal, lastSavedDate);
+      if (minuteBoundary) {
+        pushRoomStatus({ todayMin: Math.floor(todayTotal / 60) });
+      }
     }
   },
 
