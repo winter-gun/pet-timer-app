@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { usePetStore } from '@shared/store/petStore';
 import { usePrefsStore } from '@shared/store/prefsStore';
-import { useAuthStore } from '@shared/store/authStore';
 import { playCompletionSound } from '@shared/sound';
 import type { PetSpecies } from '@shared/types';
 import LevelProgress from '../components/LevelProgress';
@@ -114,14 +113,13 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export default function Settings() {
-  const signedIn = useAuthStore((s) => Boolean(s.user));
   const [tab, setTab] = useState<Tab>('basic');
 
   return (
     <div className="max-w-md space-y-6">
       <h1 className="text-2xl font-bold">설정</h1>
 
-      {signedIn && <LevelProgress />}
+      <LevelProgress />
 
       <div className="flex gap-1 border-b">
         {TABS.map((t) => (

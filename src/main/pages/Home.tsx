@@ -48,7 +48,7 @@ export default function Home() {
         </section>
       )}
 
-      {user && <LevelProgress />}
+      <LevelProgress />
 
       {user && (
         <section className="space-y-3">

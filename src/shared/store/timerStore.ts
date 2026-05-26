@@ -3,6 +3,7 @@ import type { TimerMode, TimerStatus } from '../types';
 import { saveSession, type SessionPayload } from '../firestore';
 import { playCompletionSound } from '../sound';
 import { useAuthStore } from './authStore';
+import { useLevelStore } from './levelStore';
 import { usePrefsStore } from './prefsStore';
 import { pushRoomStatus } from './roomStore';
 
@@ -196,6 +197,11 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     }
     if (state.mode === 'focus') {
       todayTotal += 1;
+      // Drive real-time coin accrual. Lifetime counter is the source of
+      // truth for the coin balance — incrementing it per tick (rather than
+      // only at session completion) is what makes coins visibly tick up
+      // while the user is focused.
+      useLevelStore.getState().addFocusSec(1);
     }
 
     let nextStatus: TimerStatus = state.status;

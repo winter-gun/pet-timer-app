@@ -1,4 +1,3 @@
-import { useAuthStore } from '@shared/store/authStore';
 import { useLevelStore } from '@shared/store/levelStore';
 import { useInventoryStore } from '@shared/store/inventoryStore';
 import {
@@ -78,7 +77,6 @@ function SlotSection({ slot, ownedItems, equippedId, balance, onTileClick }: Slo
 }
 
 export default function CustomizePanel() {
-  const signedIn = useAuthStore((s) => Boolean(s.user));
   const totalFocusSec = useLevelStore((s) => s.totalFocusSec);
   const coinsSpent = useInventoryStore((s) => s.coinsSpent);
   const ownedItems = useInventoryStore((s) => s.ownedItems);
@@ -89,14 +87,6 @@ export default function CustomizePanel() {
   const buy = useInventoryStore((s) => s.buy);
   const equip = useInventoryStore((s) => s.equip);
   const unequip = useInventoryStore((s) => s.unequip);
-
-  if (!signedIn) {
-    return (
-      <div className="text-sm text-gray-500 px-4 py-6 text-center border rounded-lg">
-        꾸미기는 로그인 후 사용할 수 있습니다.
-      </div>
-    );
-  }
 
   const balance = coinBalance(totalFocusSec, coinsSpent);
 

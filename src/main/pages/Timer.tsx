@@ -5,6 +5,9 @@ import {
   PRESET_DESCRIPTIONS,
   type TimerPreset,
 } from '@shared/store/timerStore';
+import { useLevelStore } from '@shared/store/levelStore';
+import { useInventoryStore } from '@shared/store/inventoryStore';
+import { coinBalance, coinsEarned, SEC_PER_COIN } from '@shared/items';
 
 const PRESET_ORDER: TimerPreset[] = ['pomodoro', 'short', 'long', 'custom'];
 
@@ -12,6 +15,14 @@ function formatTime(sec: number): string {
   const m = Math.floor(sec / 60).toString().padStart(2, '0');
   const s = (sec % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
+}
+
+function formatCountdown(sec: number): string {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  if (m > 0) return `${m}분 ${r}초`;
+  return `${r}초`;
 }
 
 function clampInt(value: number, min: number, max: number): number {
@@ -32,6 +43,14 @@ export default function Timer() {
   const tick = useTimerStore((s) => s.tick);
   const setPreset = useTimerStore((s) => s.setPreset);
   const setCustomDurations = useTimerStore((s) => s.setCustomDurations);
+  const totalFocusSec = useLevelStore((s) => s.totalFocusSec);
+  const coinsSpent = useInventoryStore((s) => s.coinsSpent);
+  const balance = coinBalance(totalFocusSec, coinsSpent);
+  // Seconds of focus needed to round out the next coin. coinsEarned() returns
+  // the same value whether or not coins have been spent — so progress is
+  // tracked on the lifetime accrual, not the spendable balance.
+  const earned = coinsEarned(totalFocusSec);
+  const secToNextCoin = SEC_PER_COIN - (totalFocusSec - earned * SEC_PER_COIN);
 
   useEffect(() => {
     if (status !== 'running') return;
@@ -112,6 +131,16 @@ export default function Timer() {
 
       <div className="text-7xl font-mono text-center tabular-nums">
         {formatTime(remainingSec)}
+      </div>
+
+      <div className="flex items-center justify-between px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-lg leading-none">💰</span>
+          <span className="font-medium">{balance.toLocaleString()} 코인</span>
+        </div>
+        <span className="text-xs text-amber-700">
+          다음 코인까지 {formatCountdown(secToNextCoin)}
+        </span>
       </div>
 
       <div className="flex gap-2 justify-center">
